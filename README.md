@@ -1,4 +1,5 @@
 # MillionSongDataset (MSD) converter to CSV
+[![Dependency Status](https://www.versioneye.com/user/projects/59e682660fb24f213b61dcf0/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/59e682660fb24f213b61dcf0)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg?style=flat-square)](https://raw.githubusercontent.com/yatsukav/msd_converter/master/LICENSE)
 
 ## How to run
