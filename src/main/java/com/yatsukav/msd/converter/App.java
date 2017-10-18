@@ -27,21 +27,27 @@ public class App {
     private static final Object lock = new Object();
 
     public static void main(String[] args) throws IOException {
-        long startTime = System.currentTimeMillis();
-
         // check argument
         if (args.length == 0 || !Files.exists(Paths.get(args[0]))) {
             System.out.println("You should set directory for scan in first argument." +
-                    "\nExample: java -jar mds_converter.jar \"./MillionSongDataset\"");
+                    "\nExample: java -jar msd_converter.jar \"./MillionSongDataset\"");
             return;
         }
 
+        long startTime = System.currentTimeMillis();
+        convert2csv(args[0], "MSD.csv");
+
+        System.out.println("Total processing time, ms: " + (System.currentTimeMillis() - startTime));
+        System.out.println("Converting is finished.");
+    }
+
+    static void convert2csv(String inputDir, String fileName) throws IOException {
         // get all HDF5 song files
-        Collection<File> files = FileUtils.listFiles(new File(args[0]), new String[]{"h5"}, true);
+        Collection<File> files = FileUtils.listFiles(new File(inputDir), new String[]{"h5"}, true);
         System.out.println("Total number of files: " + files.size());
 
         System.out.println("processing...");
-        try (FileWriter writer = new FileWriter("MSD.csv")) {
+        try (FileWriter writer = new FileWriter(fileName)) {
             // write header
             List<String> headers = getHeaders();
             System.out.println("Columns: " + headers);
@@ -58,12 +64,11 @@ public class App {
             for (List<File> filesPart : filesParts) {
                 executor.submit(() -> writeToWile(writer, filesPart));
             }
+            executor.shutdown();
             executor.awaitTermination(10, TimeUnit.DAYS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Total processing time, ms: " + (System.currentTimeMillis() - startTime));
-        System.out.println("Converting is finished.");
     }
 
     private static void writeToWile(FileWriter writer, List<File> files) {
