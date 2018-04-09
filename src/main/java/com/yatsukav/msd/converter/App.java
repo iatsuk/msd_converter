@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class App {
 
-    private static final String SEPARATOR = ";";
+    private static final String SEPARATOR = "\t";
     private static final AtomicLong recordsNum = new AtomicLong();
     private static final Object lock = new Object();
 
@@ -80,7 +80,7 @@ public class App {
                             .map(obj -> (obj == null) ? "" : obj)
                             .map(obj -> (obj.equals("[]") || obj.equals("NaN") || obj.equals("null")) ? null : obj)
                             .map(obj -> (obj instanceof Number && String.valueOf(((Number) obj).doubleValue()).startsWith("0.000")) ? null : obj)
-                            .map(obj -> (obj instanceof String && ((String) obj).isEmpty()) ? null : obj)
+                            .map(obj -> (obj instanceof String && (((String) obj).isEmpty() || ((String) obj).contains("null"))) ? null : obj)
                             .map(obj -> (obj != null) ? String.valueOf(obj) : "")
                             .collect(Collectors.toList());
                     synchronized (App.lock) {
