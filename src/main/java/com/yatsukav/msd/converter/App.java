@@ -49,7 +49,7 @@ public class App {
         System.out.println("processing...");
         try (FileWriter writer = new FileWriter(fileName)) {
             // write header
-            List<String> headers = getHeaders();
+            List<String> headers = defaultHeaders();
             System.out.println("Columns: " + headers);
             System.out.println("Number of columns: " + headers.size());
             writer.write(String.join(SEPARATOR, headers) + "\n");
@@ -74,32 +74,46 @@ public class App {
     private static void writeToWile(FileWriter writer, List<File> files) {
         for (File file : files) {
             try {
-                H5File h5 = Hdf5Getters.hdf5_open_readonly(file.getAbsolutePath());
-                for (int songIdx = 0; songIdx < Hdf5Getters.get_num_songs(h5); songIdx++) {
-                    List<String> data = getData(h5, songIdx).stream()
-                            .map(obj -> (obj == null) ? "" : obj)
-                            .map(obj -> (obj.equals("[]") || obj.equals("NaN") || obj.equals("null")) ? null : obj)
-                            .map(obj -> (obj instanceof Number && String.valueOf(((Number) obj).doubleValue()).startsWith("0.000")) ? null : obj)
-                            .map(obj -> (obj instanceof String && (((String) obj).isEmpty() || ((String) obj).contains("null"))) ? null : obj)
-                            .map(obj -> (obj != null) ? String.valueOf(obj) : "")
-                            .collect(Collectors.toList());
-                    synchronized (App.lock) {
-                        writer.write(String.join(SEPARATOR, data) + "\n");
-                    }
-                    long curRecNum = recordsNum.incrementAndGet();
-                    if (curRecNum % 10 == 0) {
-                        System.out.println(curRecNum + " songs was processed...");
-                    }
+                // convert
+                String csvData = hdf5ToCsv(file);
+                // write to file
+                synchronized (App.lock) {
+                    writer.write(csvData);
                 }
-                Hdf5Getters.hdf5_close(h5);
+                // count amount of total processed songs
+                int linesCount = csvData.replaceAll("[^\n]", "").length();
+                long curRecNum = recordsNum.addAndGet(linesCount);
+                // log every 10 songs
+                if (curRecNum % 10 == 0) {
+                    System.out.println(curRecNum + " songs was processed...");
+                }
             } catch (Exception e) {
                 System.out.println("Error at: " + file.getAbsolutePath());
-                e.printStackTrace();
             }
         }
     }
 
-    private static List<String> getHeaders() {
+    private static String hdf5ToCsv(File file) {
+        StringBuilder result = new StringBuilder();
+        H5File h5 = Hdf5Getters.hdf5_open_readonly(file.getAbsolutePath());
+        try {
+            for (int songIdx = 0; songIdx < Hdf5Getters.get_num_songs(h5); songIdx++) {
+                List<String> data = getData(h5, songIdx).stream()
+                        .map(obj -> (obj == null) ? "" : obj)
+                        .map(obj -> (obj.equals("[]") || obj.equals("NaN") || obj.equals("null")) ? null : obj)
+                        .map(obj -> (obj instanceof Number && String.valueOf(((Number) obj).doubleValue()).startsWith("0.000")) ? null : obj)
+                        .map(obj -> (obj instanceof String && (((String) obj).isEmpty() || ((String) obj).contains("null"))) ? null : obj)
+                        .map(obj -> (obj != null) ? String.valueOf(obj) : "")
+                        .collect(Collectors.toList());
+                result.append(String.join(SEPARATOR, data)).append("\n");
+            }
+        } finally {
+            Hdf5Getters.hdf5_close(h5);
+        }
+        return result.toString();
+    }
+
+    private static List<String> defaultHeaders() {
         return Arrays.asList(
                 "artist_name",
                 "artist_hotness",

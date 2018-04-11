@@ -36,8 +36,15 @@ public class AppTest {
         }
         assertEquals("Converting result",
                 result.toString(),
-                "artist_name;artist_hotness;artist_id;artist_location;artist_latitude;artist_longitude;artist_terms;artist_tags;year;release;title;song_hotness;duration;end_of_fade_in;loudness;mode;mode_confidence;start_of_fade_out;tempo;time_signature;time_signature_confidence\n" +
-                        "Janet Jackson;0.5682014218067547;ART4QZC1187FB51612;Los Angeles &amp; New York;NaN;NaN;\"[dance pop, hip hop, rock, urban, pop, adult contemporary, ballad, soundtrack, disco, funk, reggae, blues, singer, sexy, female, funky, jazz, country, classic, vocal, groove, sensual, soulful, diva, black, soul, fusion]\";\"[pop and chart, the queen, janet-jackson]\";1993;Janet;Hold On Baby;0.25055171998902936;10.34404;0.0;-32.742;minor;0.318;10.344;61.878;7;0.317\n");
+                "artist_name;artist_hotness;artist_id;artist_location;artist_latitude;artist_longitude;" +
+                        "artist_terms;artist_tags;year;release;title;song_hotness;duration;end_of_fade_in;loudness;" +
+                        "mode;mode_confidence;start_of_fade_out;tempo;time_signature;time_signature_confidence\n" +
+                        "Janet Jackson;0.5682014218067547;ART4QZC1187FB51612;Los Angeles &amp; New York;NaN;NaN;" +
+
+                        "\"[dance pop, hip hop, rock, urban, pop, adult contemporary, ballad, soundtrack, disco, " +
+                        "funk, reggae, blues, singer, sexy, female, funky, jazz, country, classic, vocal, groove, " +
+                        "sensual, soulful, diva, black, soul, fusion]\";\"[pop and chart, the queen, janet-jackson]\";" +
+                        "1993;Janet;Hold On Baby;0.25055171998902936;10.34404;0.0;-32.742;minor;0.318;10.344;61.878;7;0.317\n");
     }
 
 }
