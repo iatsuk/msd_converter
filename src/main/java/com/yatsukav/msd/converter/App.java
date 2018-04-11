@@ -13,18 +13,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static com.yatsukav.msd.converter.Column.*;
+
 public class App {
 
     private static final String SEPARATOR = "\t";
     private static final AtomicLong recordsNum = new AtomicLong();
     private static final Object lock = new Object();
+    private static List<Column> columns;
 
     public static void main(String[] args) throws IOException {
         // check argument
@@ -49,9 +51,13 @@ public class App {
         System.out.println("processing...");
         try (FileWriter writer = new FileWriter(fileName)) {
             // write header
-            List<String> headers = defaultHeaders();
-            System.out.println("Columns: " + headers);
-            System.out.println("Number of columns: " + headers.size());
+            columns = defaultColumns();
+            System.out.println("Columns: " + columns);
+            System.out.println("Number of columns: " + columns.size());
+            List<String> headers = columns.stream()
+                    .map(Column::toString)
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toList());
             writer.write(String.join(SEPARATOR, headers) + "\n");
 
             // split files list to process each part in parallel
@@ -98,7 +104,8 @@ public class App {
         H5File h5 = Hdf5Getters.hdf5_open_readonly(file.getAbsolutePath());
         try {
             for (int songIdx = 0; songIdx < Hdf5Getters.get_num_songs(h5); songIdx++) {
-                List<String> data = getData(h5, songIdx).stream()
+                int finalSongIdx = songIdx;
+                List<String> data = columns.stream().map(col -> col.getData(h5, finalSongIdx))
                         .map(obj -> (obj == null) ? "" : obj)
                         .map(obj -> (obj.equals("[]") || obj.equals("NaN") || obj.equals("null")) ? null : obj)
                         .map(obj -> (obj instanceof Number && String.valueOf(((Number) obj).doubleValue()).startsWith("0.000")) ? null : obj)
@@ -113,63 +120,11 @@ public class App {
         return result.toString();
     }
 
-    private static List<String> defaultHeaders() {
-        return Arrays.asList(
-                "artist_name",
-                "artist_hotness",
-                "artist_id",
-                "artist_location",
-                "artist_latitude",
-                "artist_longitude",
-                "artist_terms",
-                "artist_tags",
-                "year",
-                "release",
-                "title",
-                "song_hotness",
-                "duration",
-                "end_of_fade_in",
-                "loudness",
-                "mode",
-                "mode_confidence",
-                "start_of_fade_out",
-                "tempo",
-                "time_signature",
-                "time_signature_confidence"
+    private static List<Column> defaultColumns() {
+        return Arrays.asList(ARTIST_NAME, ARTIST_HOTNESS, ARTIST_ID, ARTIST_LOCATION, ARTIST_LATITUDE, ARTIST_LONGITUDE,
+                ARTIST_TERMS, ARTIST_TAGS, YEAR, RELEASE, TITLE, SONG_HOTNESS, DURATION, END_OF_FADE_IN, LOUDNESS,
+                MODE, MODE_CONFIDENCE, START_OF_FADE_OUT, TEMPO, TIME_SIGNATURE, TIME_SIGNATURE_CONFIDENCE
         );
     }
 
-    private static List<Object> getData(H5File h5, int songIdx) {
-        return Arrays.asList(
-                safeRead(() -> Hdf5Getters.get_artist_name(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_artist_hotttnesss(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_artist_id(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_artist_location(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_artist_latitude(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_artist_longitude(h5, songIdx)),
-                safeRead(() -> "\"" + Arrays.toString(Hdf5Getters.get_artist_terms(h5, songIdx))) + "\"",
-                safeRead(() -> "\"" + Arrays.toString(Hdf5Getters.get_artist_mbtags(h5, songIdx))) + "\"",
-                safeRead(() -> Hdf5Getters.get_year(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_release(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_title(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_song_hotttnesss(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_duration(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_end_of_fade_in(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_loudness(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_mode(h5, songIdx) == 0 ? "major" : "minor"),
-                safeRead(() -> Hdf5Getters.get_mode_confidence(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_start_of_fade_out(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_tempo(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_time_signature(h5, songIdx)),
-                safeRead(() -> Hdf5Getters.get_time_signature_confidence(h5, songIdx))
-        );
-    }
-
-    private static Object safeRead(Callable callable) {
-        try {
-            return callable.call();
-        } catch (Throwable throwable) {
-            return null;
-        }
-    }
 }

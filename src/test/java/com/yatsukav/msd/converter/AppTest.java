@@ -36,15 +36,15 @@ public class AppTest {
         }
         assertEquals("Converting result",
                 result.toString(),
-                "artist_name;artist_hotness;artist_id;artist_location;artist_latitude;artist_longitude;" +
-                        "artist_terms;artist_tags;year;release;title;song_hotness;duration;end_of_fade_in;loudness;" +
-                        "mode;mode_confidence;start_of_fade_out;tempo;time_signature;time_signature_confidence\n" +
-                        "Janet Jackson;0.5682014218067547;ART4QZC1187FB51612;Los Angeles &amp; New York;NaN;NaN;" +
+                "artist_name\tartist_hotness\tartist_id\tartist_location\tartist_latitude\tartist_longitude\t" +
+                        "artist_terms\tartist_tags\tyear\trelease\ttitle\tsong_hotness\tduration\tend_of_fade_in\t" +
+                        "loudness\tmode\tmode_confidence\tstart_of_fade_out\ttempo\ttime_signature\ttime_signature_confidence\n" +
 
-                        "\"[dance pop, hip hop, rock, urban, pop, adult contemporary, ballad, soundtrack, disco, " +
-                        "funk, reggae, blues, singer, sexy, female, funky, jazz, country, classic, vocal, groove, " +
-                        "sensual, soulful, diva, black, soul, fusion]\";\"[pop and chart, the queen, janet-jackson]\";" +
-                        "1993;Janet;Hold On Baby;0.25055171998902936;10.34404;0.0;-32.742;minor;0.318;10.344;61.878;7;0.317\n");
+                        "Janet Jackson\t0.5682014218067547\tART4QZC1187FB51612\tLos Angeles &amp; New York\tNaN\tNaN\t" +
+                        "\"[dance pop, hip hop, rock, urban, pop, adult contemporary, ballad, soundtrack, disco, funk, " +
+                        "reggae, blues, singer, sexy, female, funky, jazz, country, classic, vocal, groove, sensual, " +
+                        "soulful, diva, black, soul, fusion]\"\t\"[pop and chart, the queen, janet-jackson]\"\t1993\t" +
+                        "Janet\tHold On Baby\t0.25055171998902936\t10.34404\t0.0\t-32.742\tminor\t0.318\t10.344\t61.878\t7\t0.317\n");
     }
 
 }
